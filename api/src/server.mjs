@@ -1,0 +1,12 @@
+import {configuration} from './config.mjs';
+import {database} from './db.mjs';
+import {chain} from './chain.mjs';
+import {appFactory} from './app.mjs';
+import fastifyStatic from '@fastify/static';
+import {existsSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const config=configuration(),db=database(config);await db.migrate();const app=await appFactory({db,config,chain:chain(config)});
+const webRoot=fileURLToPath(new URL('../../dist',import.meta.url));
+if(existsSync(webRoot))await app.register(fastifyStatic,{root:webRoot,etag:true,cacheControl:true,immutable:false});
+await app.listen({port:config.port,host:'0.0.0.0'});
+process.on('SIGTERM',()=>void app.close().then(()=>db.close()));

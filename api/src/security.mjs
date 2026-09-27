@@ -1,0 +1,8 @@
+import {createCipheriv,createDecipheriv,createHash,randomBytes,timingSafeEqual} from 'node:crypto';
+import bs58 from 'bs58';
+import {Keypair} from '@solana/web3.js';
+export function keypair(secret){const bytes=secret instanceof Uint8Array?secret:secret?.startsWith('[')?Uint8Array.from(JSON.parse(secret)):bs58.decode(secret||'');return Keypair.fromSecretKey(bytes)}
+export function seal(bytes,secret,aad){if(!secret||secret.length<32)throw Error('KEY_ENCRYPTION_KEY must be at least 32 characters');const iv=randomBytes(12),key=createHash('sha256').update(secret).digest(),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from(aad));const data=Buffer.concat([cipher.update(Buffer.from(bytes)),cipher.final()]);return Buffer.concat([iv,cipher.getAuthTag(),data]).toString('base64')}
+export function unseal(value,secret,aad){const payload=Buffer.from(value,'base64'),decipher=createDecipheriv('aes-256-gcm',createHash('sha256').update(secret).digest(),payload.subarray(0,12));decipher.setAAD(Buffer.from(aad));decipher.setAuthTag(payload.subarray(12,28));return Buffer.concat([decipher.update(payload.subarray(28)),decipher.final()])}
+export function zcashTAddress(value){if(typeof value!=='string'||!/^t[1-9A-HJ-NP-Za-km-z]{33,34}$/.test(value))return false;let bytes;try{bytes=Buffer.from(bs58.decode(value))}catch{return false}if(bytes.length!==26||bytes[0]!==0x1c||![0xb8,0xbd].includes(bytes[1]))return false;const checksum=createHash('sha256').update(createHash('sha256').update(bytes.subarray(0,22)).digest()).digest().subarray(0,4);return timingSafeEqual(checksum,bytes.subarray(22))}
+export function requireThat(condition,status,message){if(!condition)throw Object.assign(new Error(message),{statusCode:status})}

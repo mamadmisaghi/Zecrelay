@@ -1,0 +1,4 @@
+import pg from 'pg';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+export function database(config){if(!config.database)throw Error('DATABASE_URL is required');const pool=new pg.Pool({connectionString:config.database,max:6,connectionTimeoutMillis:5000});return {query:(sql,params)=>pool.query(sql,params),async transaction(fn){const client=await pool.connect();try{await client.query('BEGIN');const value=await fn(client);await client.query('COMMIT');return value}catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}},async locked(fn){const client=await pool.connect();try{const {rows:[lock]}=await client.query('SELECT pg_try_advisory_lock(92086431) AS acquired');if(lock.acquired)return fn();return false}finally{await client.query('SELECT pg_advisory_unlock(92086431)');client.release()}},async migrate(){await pool.query(readFileSync(fileURLToPath(new URL('../schema.sql',import.meta.url)),'utf8'))},close:()=>pool.end()}}
