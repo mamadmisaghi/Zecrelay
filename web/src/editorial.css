@@ -54,7 +54,7 @@ body{background:#111313;color:#f4efeb}
 .editorial-capabilities span{font-size:10px;line-height:1.48;color:#c1c2be}
 .route-art{position:absolute;z-index:1;inset:51px 0 0 43%;pointer-events:none}
 .route-lines{position:absolute;top:-17px;right:1%;width:min(100%,720px);height:470px;filter:drop-shadow(0 0 10px #df9e5c27)}
-.route-rock{position:absolute;bottom:-73px;right:-23%;width:112%;height:auto;max-height:270px;object-fit:contain;opacity:.75;filter:brightness(.67) contrast(1.2)}
+.route-rock{position:absolute;bottom:-25px;right:0;width:135%;height:auto;max-height:330px;object-fit:contain;opacity:.74;filter:brightness(.72) contrast(1.18)}
 .route-aside{position:absolute;z-index:2;font:600 9px/1.8 Manrope,sans-serif;letter-spacing:.22em;color:#bca68a}
 .route-aside-top{top:29px;right:3%}
 .route-aside-bottom{right:6%;bottom:19px}
